@@ -34,8 +34,9 @@ import {
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
+import PageContainer from "@/components/PageContainer";
 
-// Mock data - Replace with actual API calls
+// // Mock data - Replace with actual API calls
 type LocationData = {
   provinces: string[];
   districts: { [key: string]: string[] };
@@ -469,63 +470,64 @@ export default function DonorRegistration() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container max-w-2xl mx-auto px-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Donor Registration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Progress Steps */}
-            <div className="flex justify-between mb-8">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step >= i ? "bg-red-600 text-white" : "bg-gray-200"
-                  }`}
-                >
-                  {i}
-                </div>
-              ))}
-            </div>
+    <PageContainer
+      title="Become a Blood Donor"
+      description="Register as a blood donor and help save lives by connecting with those in need."
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>Donor Registration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Progress Steps */}
+          <div className="flex justify-between mb-8">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  step >= i ? "bg-red-600 text-white" : "bg-gray-200"
+                }`}
+              >
+                {i}
+              </div>
+            ))}
+          </div>
 
-            <Form {...form}>
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                {step === 1 && renderLocationStep()}
-                {step === 2 && renderPersonalInfoStep()}
-                {step === 3 && renderVerificationStep()}
+          <Form {...form}>
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+              {step === 1 && renderLocationStep()}
+              {step === 2 && renderPersonalInfoStep()}
+              {step === 3 && renderVerificationStep()}
 
-                <div className="flex justify-between pt-4">
-                  {step > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep(step - 1)}
-                    >
-                      Previous
-                    </Button>
-                  )}
+              <div className="flex justify-between pt-4">
+                {step > 1 && (
                   <Button
                     type="button"
-                    className="bg-red-600 hover:bg-red-700 ml-auto"
-                    onClick={handleSubmit}
-                    disabled={loading}
+                    variant="outline"
+                    onClick={() => setStep(step - 1)}
                   >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : step === 3 ? (
-                      "Complete Registration"
-                    ) : (
-                      "Next"
-                    )}
+                    Previous
                   </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                )}
+                <Button
+                  type="button"
+                  className="bg-red-600 hover:bg-red-700 ml-auto"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : step === 3 ? (
+                    "Complete Registration"
+                  ) : (
+                    "Next"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </PageContainer>
   );
 }
