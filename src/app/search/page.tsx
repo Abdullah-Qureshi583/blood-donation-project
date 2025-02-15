@@ -219,7 +219,9 @@
 // }
 "use client";
 
-import { useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
+import { getDocs, collection, DocumentData } from "firebase/firestore";
+import { db } from "../../utlis/firebase";
 import { Search, Calendar, Phone, AlertCircle } from "lucide-react";
 import {
   Select,
@@ -251,16 +253,17 @@ import PageContainer from "@/components/PageContainer";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 const districts = ["Lahore", "Karachi", "Islamabad", "Peshawar"];
-const tehsils = ["Gulberg", "Model Town", "Cantt"];
-const unionCouncils = ["UC-1", "UC-2", "UC-3"];
+const tehsils = ["Tehsil A", "Model Town", "Cantt"];
+const unionCouncils = ["UC-X", "UC-2", "UC-3"];
 
 interface Donor {
+  fullName: string;
   id: number;
   name: string;
   bloodGroup: string;
   district: string;
   tehsil: string;
-  lastDonation: string;
+  lastDonationDate: string;
   isActive: boolean;
   isPublic: boolean;
   contact?: string;
@@ -273,33 +276,52 @@ export default function DonorSearch() {
   const [selectedUC, setSelectedUC] = useState<string>("");
   const [activeOnly, setActiveOnly] = useState(true);
   const [showResults, setShowResults] = useState(false);
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [filteredDonors, setFilteredDonors] = useState<Donor[]>([]);
 
+  const getDonors = async () => {
+    const querySnapshot = await getDocs(collection(db, "donors"));
+    const donorArray = querySnapshot.docs.map((q) => q.data() as Donor); // Ensure type safety
+    setDonors(donorArray);
+  };
+
+  useEffect(() => {
+    getDonors();
+  });
   // Mock data for demonstration
-  const donors: Donor[] = [
-    {
-      id: 1,
-      name: "Ahmed Khan",
-      bloodGroup: "O+",
-      district: "Lahore",
-      tehsil: "Gulberg",
-      lastDonation: "2024-01-15",
-      isActive: true,
-      isPublic: true,
-      contact: "+92 300 1234567",
-    },
-    {
-      id: 2,
-      name: "Sara Ali",
-      bloodGroup: "A+",
-      district: "Lahore",
-      tehsil: "Model Town",
-      lastDonation: "2023-12-01",
-      isActive: false,
-      isPublic: false,
-    },
-  ];
-
+  // const donors: Donor[] = [
+  //   {
+  //     id: 1,
+  //     name: "Ahmed Khan",
+  //     bloodGroup: "O+",
+  //     district: "Lahore",
+  //     tehsil: "Gulberg",
+  //     lastDonation: "2024-01-15",
+  //     isActive: true,
+  //     isPublic: true,
+  //     contact: "+92 300 1234567",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Sara Ali",
+  //     bloodGroup: "A+",
+  //     district: "Lahore",
+  //     tehsil: "Model Town",
+  //     lastDonation: "2023-12-01",
+  //     isActive: false,
+  //     isPublic: false,
+  //   },
+  // ];
   const handleSearch = () => {
+    const filtered = donors.filter((donor) => {
+      return (
+        (!selectedBloodGroup || donor.bloodGroup === selectedBloodGroup) &&
+        (!selectedDistrict || donor.district === selectedDistrict) &&
+        (!activeOnly || donor.isActive)
+      );
+    });
+
+    setFilteredDonors(filtered);
     setShowResults(true);
   };
 
@@ -412,7 +434,9 @@ export default function DonorSearch() {
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold">{donor.name}</h3>
+                      <h3 className="text-lg font-semibold">
+                        {donor.fullName}
+                      </h3>
                       <p className="text-sm text-gray-500">
                         {donor.district}, {donor.tehsil}
                       </p>
@@ -425,7 +449,7 @@ export default function DonorSearch() {
                   <div className="space-y-2">
                     <div className="flex items-center text-sm">
                       <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                      Last Donation: {donor.lastDonation}
+                      Last Donation: {donor.lastDonationDate}
                     </div>
 
                     <div className="flex items-center text-sm">

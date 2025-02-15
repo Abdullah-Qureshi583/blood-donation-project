@@ -149,12 +149,26 @@ export default function DonorRegistration() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    // Add API call logic here
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
+    setStep(step + 1);
     setLoading(false);
+    if (step == 3) {
+      try {
+        const response = await fetch("http://localhost:3001/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
 
-    if (step < 4) {
-      setStep(step + 1);
+        const result = await response.json();
+        if (response.ok) {
+          console.log("Registration successful:", result);
+        } else {
+          console.error("Registration failed:", result);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+      console.log(formData);
     }
   };
 
