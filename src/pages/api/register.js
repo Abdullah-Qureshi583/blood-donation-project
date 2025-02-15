@@ -1,6 +1,6 @@
-import { auth, db } from "../../utlis/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../utlis/firebase";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid"; // Generates a unique ID
 
 export default async function handler(req, res) {
   if (req.method !== "POST")
@@ -8,8 +8,6 @@ export default async function handler(req, res) {
 
   const {
     fullName,
-    email,
-    password,
     bloodGroup,
     mobileNumber,
     lastDonationDate,
@@ -20,19 +18,18 @@ export default async function handler(req, res) {
     village,
   } = req.body;
 
-  try {
-    // Create user in Firebase Authentication
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+  // if (!fullName || !bloodGroup || !mobileNumber || !lastDonationDate)
+  //   return res.status(400).json({ error: "Missing required fields" });
 
-    // Store user details in Firestore
-    await setDoc(doc(db, "donors", user.uid), {
+  const userId = uuidv4(); // Generate unique ID
+
+  try {
+    const lastDonation = new Date(lastDonationDate);
+    const isActive =
+      lastDonation < new Date(Date.now() - 110 * 24 * 60 * 60 * 1000);
+
+    await setDoc(doc(db, "donors", userId), {
       fullName,
-      email,
       bloodGroup,
       mobileNumber,
       province,
@@ -40,16 +37,12 @@ export default async function handler(req, res) {
       tehsil,
       unionCouncil,
       village,
-      lastDonationDate,
-      isActive:
-        new Date(lastDonationDate) <
-        new Date(Date.now() - 110 * 24 * 60 * 60 * 1000),
-      createdAt: new Date(),
+      lastDonationDate: Timestamp.fromDate(lastDonation),
+      isActive,
+      createdAt: Timestamp.now(),
     });
 
-    res
-      .status(201)
-      .json({ message: "User registered successfully", userId: user.uid });
+    res.status(200).json({ message: "User registered successfully", userId });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
