@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       requestId: request._id,
     });
     return NextResponse.json({ message: "Blood request submitted", request });
-  } catch (error) {
+  } catch (error:any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
