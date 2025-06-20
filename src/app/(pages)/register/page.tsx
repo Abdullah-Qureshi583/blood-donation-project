@@ -29,6 +29,8 @@ export default function DonorRegistration() {
     otp: "",
   });
 
+  
+
   const handleLocationChange = (field: string, value: string | Date | null) => {
     setFormData((prev) => {
       let updatedData = { ...prev, [field]: value };

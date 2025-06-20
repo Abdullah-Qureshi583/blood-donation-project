@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
-
+import AuthProvider from "@/components/providers/AuthProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,15 +19,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        
+      <AuthProvider>
+        <body className={inter.className}>
           <Navbar />
           <div className="bg-gradient-to-b from -[#fff6f7] dark:from-secondary dark:to-black to-white">
             <main className="container min-h-screen mx-auto ">{children}</main>
           </div>
           <Footer />
-        
-      </body>
+        </body>
+      </AuthProvider>
     </html>
   );
 }
