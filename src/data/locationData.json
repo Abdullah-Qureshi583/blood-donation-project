@@ -1,0 +1,51 @@
+{
+    "provinces": ["Punjab", "Sindh", "KPK", "Balochistan"],
+    "districts": {
+      "Punjab": ["Lahore", "Faisalabad", "Rawalpindi"],
+      "Sindh": ["Karachi", "Hyderabad", "Sukkur"],
+      "KPK": ["Peshawar", "Abbottabad", "Mardan"],
+      "Balochistan": ["Quetta", "Gwadar", "Turbat"]
+    },
+    "tehsils": {
+      "Lahore": ["Tehsil 1", "Tehsil 2", "Tehsil 3"],
+      "Faisalabad": ["Tehsil 4", "Tehsil 5"],
+      "Rawalpindi": ["Tehsil 6", "Tehsil 7"],
+      "Karachi": ["Tehsil A", "Tehsil B", "Tehsil C"],
+      "Hyderabad": ["Tehsil D", "Tehsil E"],
+      "Sukkur": ["Tehsil F", "Tehsil G"],
+      "Peshawar": ["Tehsil H", "Tehsil I"],
+      "Abbottabad": ["Tehsil J", "Tehsil K"],
+      "Mardan": ["Tehsil L", "Tehsil M"],
+      "Quetta": ["Tehsil N", "Tehsil O"],
+      "Gwadar": ["Tehsil P", "Tehsil Q"],
+      "Turbat": ["Tehsil R", "Tehsil S"]
+    },
+    "unionCouncils": {
+      "Tehsil 1": ["Union Council 1", "Union Council 2"],
+      "Tehsil 2": ["Union Council 3", "Union Council 4"],
+      "Tehsil A": ["Union Council X", "Union Council Y"],
+      "Tehsil B": ["Union Council Z", "Union Council W"],
+      "Tehsil D": ["Union Council 5", "Union Council 6"],
+      "Tehsil F": ["Union Council 7", "Union Council 8"],
+      "Tehsil H": ["Union Council 9", "Union Council 10"],
+      "Tehsil J": ["Union Council 11", "Union Council 12"],
+      "Tehsil N": ["Union Council 13", "Union Council 14"],
+      "Tehsil P": ["Union Council 15", "Union Council 16"]
+    },
+    "villages": {
+      "Union Council 1": ["Village A", "Village B"],
+      "Union Council 2": ["Village C", "Village D"],
+      "Union Council 3": ["Village E", "Village F"],
+      "Union Council 4": ["Village G", "Village H"],
+      "Union Council X": ["Village X1", "Village X2"],
+      "Union Council Y": ["Village Y1", "Village Y2"],
+      "Union Council Z": ["Village Z1", "Village Z2"],
+      "Union Council 5": ["Village I1", "Village I2"],
+      "Union Council 7": ["Village J1", "Village J2"],
+      "Union Council 9": ["Village K1", "Village K2"],
+      "Union Council 11": ["Village L1", "Village L2"],
+      "Union Council 13": ["Village M1", "Village M2"],
+      "Union Council 15": ["Village N1", "Village N2"]
+    }
+  }
+  

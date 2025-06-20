@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         
           <Navbar />
-          <div className="bg-gradient-to-b from-[#fff6f7] dark:from-secondary dark:to-black to-white">
+          <div className="bg-gradient-to-b from -[#fff6f7] dark:from-secondary dark:to-black to-white">
             <main className="container min-h-screen mx-auto ">{children}</main>
           </div>
           <Footer />

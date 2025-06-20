@@ -22,12 +22,12 @@ const config: Config = {
       colors: {
         primaryColor: "#000000",
         secondaryColor: "#585b5f",
-		lightRed:"#fee2e1",
-		normalRed:"#dc2625",
-		darkRed:"#951c1c",
-		lightBlue:"#ddeafc",
-		normalBlue:"#2563ea",
-		darkBlue:"#0E368D ",
+        lightRed: "#fee2e1",
+        normalRed: "#dc2625",
+        darkRed: "#951c1c",
+        lightBlue: "#ddeafc",
+        normalBlue: "#2563ea",
+        darkBlue: "#0E368D ",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

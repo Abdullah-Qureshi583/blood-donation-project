@@ -7,7 +7,7 @@ interface ComProps {
 }
 const PageContainer = ({ children, title, description }: ComProps) => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className=" pb-24 bg-gray-100">
       {/* Hero Section */}
       <PageHero title={title} description={description} />
       <div className="container mx-auto px-4 -mt-8">{children}</div>
