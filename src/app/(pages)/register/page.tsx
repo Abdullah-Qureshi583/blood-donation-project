@@ -1,20 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import RenderLocationStep from "./components/RenderLocationStep";
 import RenderPersonalInfoStep from "./components/RenderPersonalInfoStep";
-import RenderVerificationStep from "./components/RenderVerificationStep";
+import { RenderPersonalInfoStepProps } from "./types/renderPersonalInfoStepTypes";
+import { RenderLocationStepProps } from "./types/renderLocationStepTypes";
+import { DonorFormData } from "./types/donorFormData";
 
 export default function DonorRegistration() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const form = useForm();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [formData, setFormData] = useState({
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session) {
+      router.push("/authentication/login?callbackUrl=/register");
+    }
+  }, [session, status, router]);
+
+  const [formData, setFormData] = useState<DonorFormData>({
     country: "Pakistan",
     province: "",
     district: "",
@@ -23,42 +39,52 @@ export default function DonorRegistration() {
     village: "",
     name: "",
     fatherName: "",
-    email: "",
     bloodGroup: "",
-    lastDonation: null as Date | null,
-    otp: "",
+    lastDonation: null,
   });
 
-  
-
-  const handleLocationChange = (field: string, value: string | Date | null) => {
-    setFormData((prev) => {
-      let updatedData = { ...prev, [field]: value };
-
-      if (field === "province") {
-        updatedData = {
-          ...updatedData,
-          district: "",
-          tehsil: "",
-          unionCouncil: "",
-          village: "",
-        };
-      } else if (field === "district") {
-        updatedData = {
-          ...updatedData,
-          tehsil: "",
-          unionCouncil: "",
-          village: "",
-        };
-      } else if (field === "tehsil") {
-        updatedData = { ...updatedData, unionCouncil: "", village: "" };
-      } else if (field === "unionCouncil") {
-        updatedData = { ...updatedData, village: "" };
-      }
-
-      return updatedData;
+  const handleLocationChange = (field: string, value: any) => {
+    setFormData((prev: DonorFormData) => {
+      const newData = { ...prev, [field]: value };
+      console.log("Updated form data in page register:", newData);
+      return newData;
     });
   };
+
+  const clearMessages = () => {
+    setError("");
+    setSuccess("");
+  };
+
+  const handleError = (message: string) => {
+    setError(message);
+  };
+
+  const handleSuccess = (message: string) => {
+    setSuccess(message);
+  };
+
+  // Show loading while checking authentication
+  if (status === "loading") {
+    return (
+      <PageContainer
+        title="Become a Blood Donor"
+        description="Register as a blood donor and help save lives by connecting with those in need."
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // Don't render the form if not authenticated
+  if (!session) {
+    return null;
+  }
 
   return (
     <PageContainer
@@ -68,35 +94,41 @@ export default function DonorRegistration() {
       <Card>
         <CardHeader>
           <CardTitle>Donor Registration</CardTitle>
+          <p className="text-sm text-gray-600">
+            Welcome, {session.user?.name}! Complete your donor profile below.
+          </p>
         </CardHeader>
         <CardContent>
           {/* Progress Steps */}
-          <div className="flex justify-between mb-8 ">
-            {[1, 2, 3].map((i) => (
+          <div className="flex justify-between mb-8 gap-4">
+            {["Personal Info", "Location Info"].map((item, idx) => (
               <div
-                key={i}
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= i ? "bg-normalRed text-white" : "bg-gray-200"
+                key={item}
+                className={`w-full h-10  rounded-md  flex items-center justify-center ${
+                  step === idx + 1 ? "bg-normalRed text-white" : "bg-gray-200"
                 }`}
               >
-                {i}
+                {item}
               </div>
             ))}
           </div>
 
+          {/* Error and Success Messages */}
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md mb-4">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md mb-4">
+              {success}
+            </div>
+          )}
+
           <Form {...form}>
             <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
               {step === 1 && (
-                <RenderLocationStep
-                  formData={formData}
-                  handleLocationChange={handleLocationChange}
-                  step={step}
-                  setStep={setStep}
-                  loading={loading}
-                  setLoading={setLoading}
-                />
-              )}
-              {step === 2 && (
                 <RenderPersonalInfoStep
                   formData={formData}
                   handleLocationChange={handleLocationChange}
@@ -104,19 +136,24 @@ export default function DonorRegistration() {
                   setStep={setStep}
                   loading={loading}
                   setLoading={setLoading}
+                  setError={handleError}
+                  setSuccess={handleSuccess}
+                  clearMessages={clearMessages}
                 />
               )}
-              {step === 3 && (
-                <RenderVerificationStep
-                  loading={loading}
-                  setLoading={setLoading}
+              {step === 2 && (
+                <RenderLocationStep
                   formData={formData}
                   handleLocationChange={handleLocationChange}
                   step={step}
                   setStep={setStep}
+                  loading={loading}
+                  setLoading={setLoading}
+                  setError={handleError}
+                  setSuccess={handleSuccess}
+                  clearMessages={clearMessages}
                 />
               )}
-              {step === 4 && <div>cndj</div>}
             </form>
           </Form>
         </CardContent>

@@ -1,39 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { LuLoaderCircle } from "react-icons/lu";
+
 import { Calendar, Phone, AlertCircle } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SearchDataType } from "../types/type";
+
 import { Donor } from "@/types/donor";
 
-const SearchResult = ({ filter }: { filter: SearchDataType }) => {
-  const [donors, setDonors] = useState<Donor[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams({
-      bloodGroup: filter.selectedBloodGroup,
-      district: filter.selectedDistrict,
-      tehsil: filter.selectedTehsil,
-      unionCouncil: filter.selectedUC,
-      activeOnly: filter.activeOnly ? 'true' : 'false',
-    });
-    setLoading(true);
-    fetch(`/api/search?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        setDonors(data.donors);
-        setLoading(false);
-      });
-  }, [filter]);
-
-  if (loading) return <div>Loading...</div>;
-  if (!donors.length) return <div>No donors found.</div>;
+const SearchResult = ({
+  loading,
+  donors,
+}: {
+  loading: boolean;
+  donors: Donor[];
+}) => {
+  if (loading)
+    return (
+      <div className="text-2xl font-bold flex gap-1 items-center ml-5">
+        {" "}
+        <LuLoaderCircle /> Loading...
+      </div>
+    );
+  if (!donors.length)
+    return <div className="text-2xl font-bold">No donors found.</div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {donors.map((donor) => (
-        <Card key={donor.id || donor._id}>
+        <Card key={donor.id}>
           <CardContent className="pt-6">
             <div className="flex justify-between items-start mb-4">
               <div>

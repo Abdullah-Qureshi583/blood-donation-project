@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,13 +19,14 @@ import FieldSelect from "./components/FiledSelect";
 import SearchResult from "./components/SearchResult";
 
 import { SearchDataType } from "./types/type";
+import { Donor } from "@/types/donor";
 
 const bloodGroups: string[] = bloodGroupsData;
-const districts: string[] = Object.keys(locationData.districts);
-const tehsils: string[] = Object.keys(locationData.tehsils);
-const unionCouncils: string[] = Object.keys(locationData.unionCouncils);
 
 export default function DonorSearch() {
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [donorLoading, setDonorLoading] = useState(false);
+
   const [searchData, setSearchData] = useState<SearchDataType>({
     selectedBloodGroup: "",
     selectedProvince: "",
@@ -35,7 +36,9 @@ export default function DonorSearch() {
     activeOnly: true,
   });
 
-  const [submittedFilter, setSubmittedFilter] = useState<SearchDataType | null>(null);
+  const [submittedFilter, setSubmittedFilter] = useState<SearchDataType | null>(
+    null
+  );
   const [showAdvanced, setShowAdvanced] = useState(false);
   const isSearchActive =
     searchData.selectedBloodGroup !== "" &&
@@ -63,6 +66,50 @@ export default function DonorSearch() {
 
   const handleSearch = () => setSubmittedFilter(searchData);
 
+  useEffect(() => {
+    if (!submittedFilter) return;
+
+    const searchData = {
+      bloodGroup: submittedFilter.selectedBloodGroup,
+      district: submittedFilter.selectedDistrict,
+      tehsil: submittedFilter.selectedTehsil,
+      unionCouncil: submittedFilter.selectedUC,
+      activeOnly: submittedFilter.activeOnly,
+    };
+
+    setDonorLoading(true);
+    fetch("/api/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(searchData),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.message || `HTTP error! status: ${res.status}`
+          );
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          setDonors(data.donors);
+        } else {
+          console.error("Search failed:", data.error);
+          setDonors([]);
+        }
+        setDonorLoading(false);
+      })
+      .catch((error) => {
+        console.error("Search error:", error);
+        setDonors([]);
+        setDonorLoading(false);
+        // You can add a toast notification here if you have a notification system
+      });
+  }, [submittedFilter]);
   return (
     <PageContainer
       title="Find Blood Donors Instantly"
@@ -187,7 +234,7 @@ export default function DonorSearch() {
           <h2 className="text-2xl font-semibold text-gray-900">
             Search Results
           </h2>
-          <SearchResult filter={submittedFilter} />
+          <SearchResult loading={donorLoading} donors={donors} />
         </div>
       )}
     </PageContainer>

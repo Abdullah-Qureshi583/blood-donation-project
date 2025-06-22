@@ -1,6 +1,6 @@
 // app/api/request/route.ts (API for Blood Requests)
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/dbConnect";
+import { connectDB } from "@/lib/connectDB";
 import Request from "@/models/Request";
 import Notification from "@/models/Notification";
 

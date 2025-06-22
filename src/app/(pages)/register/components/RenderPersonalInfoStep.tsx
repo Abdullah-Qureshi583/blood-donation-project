@@ -23,34 +23,40 @@ const RenderPersonalInfoStep: React.FC<RenderPersonalInfoStepProps> = ({
   setStep,
   loading,
   setLoading,
+  setError,
+  setSuccess,
+  clearMessages,
 }) => {
   const isActive =
-    formData.name.trim() !== "" && 
+    formData.name.trim() !== "" &&
     formData.fatherName.trim() !== "" &&
-    formData.bloodGroup !== "" && 
+    formData.bloodGroup !== "" &&
     formData.lastDonation instanceof Date;
 
+  const handleFieldChange = (field: string, value: any) => {
+    handleLocationChange(field, value);
+  };
 
   return (
     <div className="space-y-4">
       <PersonalInfoSelectField
         label="Full Name"
         value={formData.name}
-        onChange={(value) => handleLocationChange("name", value)}
+        onChange={(value) => handleFieldChange("name", value)}
         placeholder="Enter your full name"
       />
 
       <PersonalInfoSelectField
         label="Fathers Name"
         value={formData.fatherName}
-        onChange={(value) => handleLocationChange("fatherName", value)}
+        onChange={(value) => handleFieldChange("fatherName", value)}
         placeholder="Enter your father's name"
       />
 
       <PersonalInfoSelectField
         label="Blood Group"
         value={formData.bloodGroup}
-        onChange={(value) => handleLocationChange("bloodGroup", value)}
+        onChange={(value) => handleFieldChange("bloodGroup", value)}
         placeholder="Select Blood Group"
         isSelect={true}
         options={bloodGroups}
@@ -79,9 +85,10 @@ const RenderPersonalInfoStep: React.FC<RenderPersonalInfoStepProps> = ({
                 <Calendar
                   mode="single"
                   selected={formData.lastDonation || undefined}
-                  onSelect={(date) =>
-                    handleLocationChange("lastDonation", date || null)
-                  }
+                  onSelect={(date) => {
+                    console.log("📅 [PERSONAL INFO STEP] Date selected:", date);
+                    handleFieldChange("lastDonation", date || null);
+                  }}
                   disabled={(date) => date > new Date()}
                   initialFocus
                 />
@@ -90,12 +97,17 @@ const RenderPersonalInfoStep: React.FC<RenderPersonalInfoStepProps> = ({
           </FormItem>
         )}
       />
+
       <ChangeStep
+        formData={formData}
         isActive={isActive}
         step={step}
         setStep={setStep}
         loading={loading}
         setLoading={setLoading}
+        setError={setError}
+        setSuccess={setSuccess}
+        clearMessages={clearMessages}
       />
     </div>
   );

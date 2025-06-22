@@ -2,9 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Menu, X, Bell } from "lucide-react";
+import { Menu, X, Bell, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useSession, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -23,18 +25,24 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "About Us", href: "/about" },
     { name: "Contact Us", href: "/contact" },
-    { name: "Donor Register", href: "/register" },
     { name: "Donor Search", href: "/search" },
   ];
 
+  // Add donor registration only if user is authenticated
+  if (session) {
+    navItems.push({ name: "Become a Donor", href: "/register" });
+  }
+
   useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => res.json())
-      .then((data) => {
-        setNotifications(data.notifications);
-        setUnreadCount(data.notifications.filter((n: any) => !n.read).length);
-      });
-  }, []);
+    if (session) {
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((data) => {
+          setNotifications(data.notifications);
+          setUnreadCount(data.notifications.filter((n: any) => !n.read).length);
+        });
+    }
+  }, [session]);
 
   const markAsRead = async (id: string) => {
     await fetch("/api/notifications", {
@@ -46,6 +54,10 @@ export default function Navbar() {
       prev.map((n: any) => (n._id === id ? { ...n, read: true } : n))
     );
     setUnreadCount((prev) => prev - 1);
+  };
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -74,68 +86,104 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
-            {/* Notification Bell */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-6 w-6" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {notifications.length === 0 && (
-                  <DropdownMenuItem>No notifications</DropdownMenuItem>
-                )}
-                {notifications.map((n: any) => (
-                  <DropdownMenuItem
-                    key={n._id}
-                    onClick={() => markAsRead(n._id)}
-                    className={n.read ? "" : "font-bold bg-red-50"}
-                  >
-                    {n.message}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            
+            {/* User Menu */}
+            {session ? (
+              <>
+                {/* Notification Bell */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="h-6 w-6" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-80">
+                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {notifications.length === 0 && (
+                      <DropdownMenuItem>No notifications</DropdownMenuItem>
+                    )}
+                    {notifications.map((n: any) => (
+                      <DropdownMenuItem
+                        key={n._id}
+                        onClick={() => markAsRead(n._id)}
+                        className={n.read ? "" : "font-bold bg-red-50"}
+                      >
+                        {n.message}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* User Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <User className="h-6 w-6" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link href="/authentication/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link href="/authentication/signup">
+                  <Button className="bg-red-600 hover:bg-red-700">Sign Up</Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            {/* Notification Bell for mobile */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-6 w-6" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
-                      {unreadCount}
-                    </span>
+            {session && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {notifications.length === 0 && (
+                    <DropdownMenuItem>No notifications</DropdownMenuItem>
                   )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {notifications.length === 0 && (
-                  <DropdownMenuItem>No notifications</DropdownMenuItem>
-                )}
-                {notifications.map((n: any) => (
-                  <DropdownMenuItem
-                    key={n._id}
-                    onClick={() => markAsRead(n._id)}
-                    className={n.read ? "" : "font-bold bg-red-50"}
-                  >
-                    {n.message}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {notifications.map((n: any) => (
+                    <DropdownMenuItem
+                      key={n._id}
+                      onClick={() => markAsRead(n._id)}
+                      className={n.read ? "" : "font-bold bg-red-50"}
+                    >
+                      {n.message}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -165,6 +213,44 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
+              
+              {session ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setIsOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/authentication/login"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/authentication/signup"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

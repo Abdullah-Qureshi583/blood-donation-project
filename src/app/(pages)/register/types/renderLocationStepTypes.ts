@@ -20,4 +20,7 @@ export type RenderLocationStepProps = {
   setStep: (step: number) => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
+  setError?: (message: string) => void;
+  setSuccess?: (message: string) => void;
+  clearMessages?: () => void;
 };

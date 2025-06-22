@@ -2,17 +2,28 @@
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import React from "react";
 
 export interface FieldDefinition {
   name: string;
   type: string;
   placeholder: string;
+  label?: string;
   validation?: any;
+  disabled?: boolean;
 }
 
 interface LinkDefinition {
   name: string;
   href: string;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 interface AuthFormProps {
@@ -23,36 +34,77 @@ interface AuthFormProps {
   submitLabel?: string;
   links?: LinkDefinition[];
   onSubmitCustom?: (data: any) => Promise<void> | void;
+  loading?: boolean;
+  disabled?: boolean;
+  description?: string;
+  showDivider?: boolean;
+  handleSubmit?: (data: any) => Promise<void> | void;
+  error?: string;
+  success?: string;
 }
 
 export default function AuthForm({
   fields,
-  providers = ["google", "facebook"],
+  providers = ["google", "github"],
   showProviders = true,
   title = "Login",
   submitLabel = "Login",
   links,
   onSubmitCustom,
+  loading = false,
+  disabled = false,
+  description,
+  showDivider = true,
+  handleSubmit: externalHandleSubmit,
+  error: externalError,
+  success: externalSuccess,
 }: AuthFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm();
-  const [error, setError] = useState("");
+    formState: { errors, isSubmitting, isValid, isDirty },
+  } = useForm({ mode: "onChange" });
+  const [error, setError] = useState(externalError || "");
+  const [success, setSuccess] = useState(externalSuccess || "");
+
+  // Update internal state when external messages change
+  React.useEffect(() => {
+    if (externalError !== undefined) {
+      setError(externalError);
+    }
+  }, [externalError]);
+
+  React.useEffect(() => {
+    if (externalSuccess !== undefined) {
+      setSuccess(externalSuccess);
+    }
+  }, [externalSuccess]);
+
+  const isFormLoading = loading || isSubmitting;
+  const isFormDisabled = disabled || isFormLoading;
+
+  // Check if form is valid and has been interacted with
+  const isFormValid = isValid && isDirty;
 
   // Submit handler
   const onSubmit = async (data: any) => {
+    if (isFormDisabled || !isFormValid) return;
+
     setError("");
+    setSuccess("");
     try {
-      if (onSubmitCustom) {
+      if (externalHandleSubmit) {
+        await externalHandleSubmit(data);
+      } else if (onSubmitCustom) {
         await onSubmitCustom(data);
       } else {
         // Default: try credentials login
         const res = await signIn("credentials", { redirect: false, ...data });
         if (res?.error) setError(res.error);
-        else if (res?.ok) window.location.href = "/dashboard";
+        else if (res?.ok) {
+          setSuccess("Login successful! Redirecting...");
+          setTimeout(() => (window.location.href = "/dashboard"), 1000);
+        }
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -61,60 +113,133 @@ export default function AuthForm({
 
   // Provider button rendering
   const renderProviderButtons = () => (
-    <div className="flex gap-2 mt-2 mb-2">
-      {providers.map((provider) => (
-        <button
-          key={provider}
-          type="button"
-          className="flex-1 bg-gray-100 border border-gray-300 rounded py-2 px-2 hover:bg-gray-200 transition"
-          onClick={() => signIn(provider)}
-        >
-          Login with {provider.charAt(0).toUpperCase() + provider.slice(1)}
-        </button>
-      ))}
+    <div className="flex flex-col gap-3 mt-6">
+      {showDivider && (
+        <div className="flex items-center w-full gap-2 my-4">
+          <div className="flex-1 h-px bg-muted-foreground/30" />
+          <span className="text-xs uppercase text-muted-foreground whitespace-nowrap">
+            Or continue with
+          </span>
+          <div className="flex-1 h-px bg-muted-foreground/30" />
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        {providers.map((provider) => (
+          <Button
+            key={provider}
+            variant="outline"
+            type="button"
+            onClick={() => signIn(provider)}
+            className="w-full"
+            disabled={isFormDisabled}
+          >
+            {provider.charAt(0).toUpperCase() + provider.slice(1)}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 
   return (
-    <div className="max-w-md mx-auto mt-2 p-8 bg-white rounded-xl shadow-lg border border-gray-100">
-      <h2 className="text-3xl font-bold mb-6 text-center">{title}</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {fields.map((field) => (
-          <div key={field.name}>
-            <input
-              className="w-full border p-2 rounded focus:outline-blue-500"
-              type={field.type}
-              placeholder={field.placeholder}
-              {...register(field.name, field.validation)}
-            />
-            {errors[field.name] && (
-              <div className="text-red-600 text-sm">
-                {errors[field.name]?.message as string}
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            {title}
+          </CardTitle>
+          {description && (
+            <p className="text-sm text-muted-foreground text-center">
+              {description}
+            </p>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {fields.map((field) => (
+              <div key={field.name} className="space-y-2">
+                <Label htmlFor={field.name} className="text-sm font-medium">
+                  {field.label || field.placeholder}
+                </Label>
+                <Input
+                  id={field.name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  disabled={isFormDisabled || field.disabled}
+                  {...register(field.name, field.validation)}
+                  className={cn(
+                    errors[field.name] &&
+                      "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                {errors[field.name] && (
+                  <p className="text-sm text-destructive">
+                    {errors[field.name]?.message as string}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            <Button
+              type="submit"
+              className="w-full bg-normalRed hover:bg-darkRed text-white"
+              disabled={isFormDisabled || !isFormValid}
+            >
+              {isFormLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {submitLabel}...
+                </>
+              ) : (
+                submitLabel
+              )}
+            </Button>
+
+            {error && (
+              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                {error}
               </div>
             )}
-          </div>
-        ))}
-        <button
-          className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? submitLabel + "..." : submitLabel}
-        </button>
-        {showProviders && renderProviderButtons()}
-        {error && <div className="text-red-600 text-center mt-2">{error}</div>}
-      </form>
-      {links && links.length > 0 && (
-        <div className="mt-6 text-center text-sm text-gray-600">
-          {links.map((link, idx) => (
-            <div key={idx}>
-              <a href={link.href} className="text-blue-600 hover:underline">
-                {link.name}
-              </a>
+
+            {success && (
+              <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
+                {success}
+              </div>
+            )}
+          </form>
+
+          {showProviders && renderProviderButtons()}
+
+          {links && links.length > 0 && (
+            <div className="mt-6 text-center space-y-2">
+              {links.map((link, idx) => (
+                <div key={idx}>
+                  {link.onClick ? (
+                    <button
+                      onClick={link.onClick}
+                      disabled={link.disabled || isFormDisabled}
+                      className={cn(
+                        "text-sm text-normalBlue hover:text-darkBlue hover:underline transition-colors",
+                        link.disabled &&
+                          "opacity-50 cursor-not-allowed hover:no-underline"
+                      )}
+                    >
+                      {link.name}
+                    </button>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-normalBlue hover:text-darkBlue hover:underline transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

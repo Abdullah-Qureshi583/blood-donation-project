@@ -23,6 +23,9 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
   setStep,
   loading,
   setLoading,
+  setError,
+  setSuccess,
+  clearMessages,
 }) => {
   const isActive =
     !!formData.province && // Province must be selected
@@ -44,14 +47,12 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
           </FormItem>
         )}
       />
-
       <LocationSelectField
         label="Province"
         value={formData.province}
         onValueChange={(value) => handleLocationChange("province", value)}
         options={locationData.provinces}
       />
-
       {formData.province && locationData.districts[formData.province] && (
         <LocationSelectField
           label="District"
@@ -60,7 +61,6 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
           options={locationData.districts[formData.province] || []}
         />
       )}
-
       {formData.district && locationData.tehsils[formData.district] && (
         <LocationSelectField
           label="Tehsil"
@@ -69,7 +69,6 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
           options={locationData.tehsils[formData.district] || []}
         />
       )}
-
       {formData.tehsil && locationData.unionCouncils[formData.tehsil] && (
         <LocationSelectField
           label="Union Council"
@@ -78,22 +77,26 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
           options={locationData.unionCouncils[formData.tehsil] || []}
         />
       )}
-
-      {formData.unionCouncil && locationData.villages[formData.unionCouncil] && (
-        <LocationSelectField
-          label="Village"
-          value={formData.village}
-          onValueChange={(value) => handleLocationChange("village", value)}
-          options={locationData.villages[formData.unionCouncil] || []}
-        />
-      )}
+      {formData.unionCouncil &&
+        locationData.villages[formData.unionCouncil] && (
+          <LocationSelectField
+            label="Village"
+            value={formData.village}
+            onValueChange={(value) => handleLocationChange("village", value)}
+            options={locationData.villages[formData.unionCouncil] || []}
+          />
+        )}
 
       <ChangeStep
+        formData={formData}
         isActive={isActive}
         step={step}
         setStep={setStep}
         loading={loading}
         setLoading={setLoading}
+        setError={setError}
+        setSuccess={setSuccess}
+        clearMessages={clearMessages}
       />
     </div>
   );

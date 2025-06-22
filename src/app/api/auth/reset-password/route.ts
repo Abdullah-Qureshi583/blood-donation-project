@@ -1,25 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/dbConnect";
-import Donor from "@/models/Donor";
-import otpStore from "@/lib/otpStore";
+import { connectDB } from "@/lib/connectDB";
+import User from "@/models/User";
 import { hashPassword } from "@/lib/hash";
 
 export async function POST(req: NextRequest) {
-  await connectDB();
-  const { email, otp, newPassword } = await req.json();
-  if (!email || !otp || !newPassword) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  try {
+    await connectDB();
+    const { email, newPassword } = await req.json();
+    
+    if (!email || !newPassword) {
+      return NextResponse.json({ 
+        success: false,
+        error: "Email and new password are required" 
+      }, { status: 400 });
+    }
+
+    // Find the user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ 
+        success: false,
+        error: "User not found" 
+      }, { status: 404 });
+    }
+
+    // Hash the new password
+    const hashedPassword = await hashPassword(newPassword);
+    
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    console.log(`Password reset successful for user: ${email}`);
+
+    return NextResponse.json({ 
+      success: true,
+      message: "Password reset successfully"
+    });
+
+  } catch (error: any) {
+    console.error("Password reset error:", error);
+    return NextResponse.json({ 
+      success: false,
+      error: "Failed to reset password. Please try again." 
+    }, { status: 500 });
   }
-  const code = otpStore.get(email);
-  if (code !== otp) {
-    return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
-  }
-  const user = await Donor.findOne({ email });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-  user.password = await hashPassword(newPassword);
-  await user.save();
-  otpStore.delete(email);
-  return NextResponse.json({ success: true });
 }

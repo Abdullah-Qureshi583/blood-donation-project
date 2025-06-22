@@ -2,7 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
-
+interface ChangeStepProps {
+  loading: true | false;
+  setLoading: any;
+  step: number;
+  setStep: any;
+  isActive: boolean;
+  formData?: any; // this should be the state of the form inputs
+  setError?: (message: string) => void;
+  setSuccess?: (message: string) => void;
+  clearMessages?: () => void;
+}
 const ChangeStep = ({
   loading,
   setLoading,
@@ -10,47 +20,59 @@ const ChangeStep = ({
   setStep,
   isActive,
   formData,
-}: {
-  loading: true | false;
-  setLoading: any;
-  step: number;
-  setStep: any;
-  isActive: boolean;
-  formData?: any; // this should be the state of the form inputs  }) => {
-}) => {
+  setError,
+  setSuccess,
+  clearMessages,
+}: ChangeStepProps) => {
   const router = useRouter();
+
   const handleSubmit = async () => {
     setLoading(true);
-    if (step >= 1 && step < 3 ) {
+    clearMessages?.();
+
+    if (step == 1) {
       setStep(step + 1);
       setLoading(false);
-    }
-    else if (step === 3) {
+    } else if (step === 2) {
+      console.log("When submitting the form the form data is :", formData);
+
       // Register the donor
       try {
-        const res = await fetch('/api/donors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/donors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
+
         if (res.ok) {
-          router.replace('/success');
+          const result = await res.json();
+
+          setSuccess?.("Registration completed successfully! Redirecting...");
+          router.replace("/dashboard");
         } else {
-          alert('Registration failed');
+          const errorData = await res.json();
+          setError?.(
+            `Registration failed: ${errorData.error || "Unknown error"}`
+          );
         }
       } catch (e) {
-        alert('Registration failed');
+        console.error("❌ [CHANGE STEP] Network error during registration:", e);
+        setError?.("Registration failed. Please try again.");
       }
       setLoading(false);
     }
   };
+
   return (
     <div className="flex justify-between pt-4">
       {step > 1 && (
         <Button
           type="button"
           variant="outline"
-          onClick={() => setStep(step - 1)}
+          onClick={() => {
+            console.log("⬅️ [CHANGE STEP] Going back to step:", step - 1);
+            setStep(step - 1);
+          }}
         >
           Previous
         </Button>
@@ -63,7 +85,7 @@ const ChangeStep = ({
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
-        ) : step === 3 ? (
+        ) : step === 2 ? (
           "Complete Registration"
         ) : (
           "Next"
