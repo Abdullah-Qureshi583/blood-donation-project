@@ -1,7 +1,7 @@
 import React from "react";
 import { LuLoaderCircle } from "react-icons/lu";
-
-import { Calendar, Phone, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, Phone, AlertCircle, ExternalLink } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,21 @@ const SearchResult = ({
   loading: boolean;
   donors: Donor[];
 }) => {
+  const router = useRouter();
+
+  const handleViewDetails = (donorId: string) => {
+    if (!donorId) {
+      console.error('Invalid donor ID');
+      return;
+    }
+    router.push(`/donor/${donorId}`);
+  };
+
   if (loading)
     return (
       <div className="text-2xl font-bold flex gap-1 items-center ml-5">
         {" "}
-        <LuLoaderCircle /> Loading...
+        <LuLoaderCircle className="animate-spin" /> Loading...
       </div>
     );
   if (!donors.length)
@@ -28,12 +38,11 @@ const SearchResult = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {donors.map((donor) => (
-        <Card key={donor.id}>
+        <Card key={donor.id} className="relative hover:shadow-lg transition-shadow">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-semibold">{donor.name}</h3>
-
                 <p className="text-sm text-gray-500">
                   <span className="text-gray-700">Location:</span>{" "}
                   {donor.village && donor.village + ", "}
@@ -51,7 +60,7 @@ const SearchResult = ({
             <div className="space-y-2">
               <div className="flex items-center text-sm">
                 <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                Last Donation: {donor.lastDonation}
+                Last Donation: {new Date(donor.lastDonation).toLocaleDateString()}
               </div>
 
               <div className="flex items-center text-sm">
@@ -66,16 +75,25 @@ const SearchResult = ({
                 </span>
               </div>
 
-              {donor.isPublic ? (
-                <div className="flex items-center text-sm">
-                  <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                  {donor.contact}
-                </div>
-              ) : (
-                <Button variant="outline" className="w-full mt-2">
-                  Request Contact Details
+              <div className="flex gap-2 mt-4">
+                {donor.isPublic ? (
+                  <div className="flex items-center text-sm">
+                    <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                    {donor.contact}
+                  </div>
+                ) : (
+                  <Button variant="outline" className="flex-1">
+                    Request Contact Details
+                  </Button>
+                )}
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={() => handleViewDetails(donor.id)}
+                >
+                  View Details
+                  <ExternalLink className="w-4 h-4" />
                 </Button>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     data.isActive = lastDonationDate > threeMonthsAgo;
 
-    // data.userId = session.user.id;
+    data.userId = session.user.id;
     data.email = session.user.email;
 
     console.log("🔧 [DONORS API] Final donor data:", data);
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     console.log("🔔 [DONORS API] Creating notification...");
     await Notification.create({
-      message: `New donor registered: ${donor.name}`,
+      message: `New donor registered: ${donor.firstName} ${donor.lastName || ''}`.trim(),
       donorId: donor._id,
     });
     console.log("✅ [DONORS API] Notification created successfully");

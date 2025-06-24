@@ -18,10 +18,31 @@ export async function POST(req: Request) {
     
     const donors = await Donor.find(filter).sort({ createdAt: -1 });
     
+    // Transform donor data to match the expected format
+    const formattedDonors = donors.map(donor => {
+      // Only include donors with valid IDs
+      if (!donor._id) return null;
+
+      return {
+        id: donor._id.toString(),
+        name: `${donor.firstName} ${donor.lastName || ''}`.trim(),
+        bloodGroup: donor.bloodGroup,
+        province: donor.province,
+        district: donor.district,
+        tehsil: donor.tehsil,
+        unionCouncil: donor.unionCouncil,
+        village: donor.village,
+        lastDonation: donor.lastDonation,
+        isActive: donor.isActive,
+        isPublic: donor.isPublic,
+        contact: donor.contact
+      };
+    }).filter(donor => donor !== null); // Filter out any null entries
+
     return NextResponse.json({ 
       success: true,
-      donors,
-      count: donors.length 
+      donors: formattedDonors,
+      count: formattedDonors.length 
     });
     
   } catch (error: any) {

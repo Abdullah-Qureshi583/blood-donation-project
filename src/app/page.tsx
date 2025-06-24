@@ -26,6 +26,7 @@ export default function HomePage() {
             title="Register as Donor"
             description="Join our noble cause by registering as a blood donor. Help save lives in your community."
             linkHref="/register"
+            linkLable="Register Now"
           />
 
           {/* Search Blood Card */}
@@ -34,6 +35,7 @@ export default function HomePage() {
             title="Search Blood"
             description="Find blood donors in your area quickly and easily. Emergency support available 24/7."
             linkHref="/search"
+            linkLable="Search Now"
           />
         </div>
 

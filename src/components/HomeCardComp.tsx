@@ -8,8 +8,15 @@ interface CardProps {
   description: string;
   theme: "red" | "blue";
   linkHref: string;
+  linkLable: string;
 }
-const HomeCardComp = ({ theme, title, description, linkHref }: CardProps) => {
+const HomeCardComp = ({
+  theme,
+  title,
+  description,
+  linkHref,
+  linkLable,
+}: CardProps) => {
   return (
     <Card className="group hover:shadow-lg transition-shadow duration-300">
       <CardContent className="p-8 flex flex-col items-center text-center">
@@ -35,7 +42,7 @@ const HomeCardComp = ({ theme, title, description, linkHref }: CardProps) => {
               : "bg-normalBlue hover:bg-darkBlue"
           }  text-white  w-full max-w-xs`}
         >
-          <Link href={linkHref}>Register Now</Link>
+          <Link href={linkHref}>{linkLable ? linkLable : "Register Now"}</Link>
         </Button>
       </CardContent>
     </Card>

@@ -71,7 +71,7 @@ export default function ForgetPassword() {
       label: "Confirm New Password",
       validation: {
         required: "Please confirm your password",
-        validate: (value: string, formValues: any) => 
+        validate: (value: string, formValues: any) =>
           value === formValues.newPassword || "Passwords do not match",
       },
     },
@@ -96,7 +96,6 @@ export default function ForgetPassword() {
     setLoading(true);
     setError("");
     setSuccess("");
-    
     try {
       // Check if user exists first
       const checkUserRes = await fetch("/api/auth/check-user-exist", {
@@ -104,39 +103,29 @@ export default function ForgetPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: data.email }),
       });
-      
       const userData = await checkUserRes.json();
-      
       if (!userData.exists) {
         setError("No account found with this email address.");
         return;
       }
-
-      // Send OTP using secure backend API
-      const res = await fetch("/api/auth/otp", {
+      // Send OTP using new endpoint
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: data.email,
-          action: "send"
-        }),
+        body: JSON.stringify({ email: data.email }),
       });
-      
       const result = await res.json();
-      
       if (res.ok) {
         setEmail(data.email);
         setOtp("");
         setStep("otp");
         setAttempts(0);
         startResendCountdown();
-        console.log("Email submitted:", data.email);
         setSuccess("Verification code sent to your email!");
       } else {
         setError("Failed to send OTP: " + result.error);
       }
     } catch (error) {
-      console.error("Email submission error:", error);
       setError("Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
@@ -148,30 +137,21 @@ export default function ForgetPassword() {
     setLoading(true);
     setError("");
     setSuccess("");
-    
     try {
-      // Verify OTP using secure backend API
-      const res = await fetch("/api/auth/otp", {
+      // Verify OTP using new endpoint
+      const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: email,
-          action: "verify",
-          otp: data.otp
-        }),
+        body: JSON.stringify({ email: email, otp: data.otp }),
       });
-      
       const result = await res.json();
-      
       if (res.ok && result.success) {
         setOtp(data.otp);
         setStep("reset");
-        console.log("OTP verified successfully");
         setSuccess("Code verified successfully!");
       } else {
-        setAttempts(prev => prev + 1);
+        setAttempts((prev) => prev + 1);
         if (attempts >= 2) {
-          // Too many attempts, go back to email step
           setStep("email");
           setAttempts(0);
           setError("Too many incorrect attempts. Please try again.");
@@ -180,7 +160,6 @@ export default function ForgetPassword() {
         }
       }
     } catch (error) {
-      console.error("OTP verification error:", error);
       setError("Failed to verify OTP. Please try again.");
     } finally {
       setLoading(false);
@@ -192,7 +171,7 @@ export default function ForgetPassword() {
     setLoading(true);
     setError("");
     setSuccess("");
-    
+
     try {
       // Use the existing reset password API (OTP already verified in previous step)
       const res = await fetch("/api/auth/reset-password", {
@@ -203,9 +182,9 @@ export default function ForgetPassword() {
           newPassword: data.newPassword,
         }),
       });
-      
+
       const result = await res.json();
-      
+
       if (res.ok && result.success) {
         console.log("Password reset:", result);
         setSuccess("Password reset successfully! Redirecting to login...");
@@ -226,24 +205,17 @@ export default function ForgetPassword() {
   // Handle resend OTP - using secure backend
   const handleResendOtp = async () => {
     if (resendCountdown > 0) return;
-    
     setLoading(true);
     setError("");
     setSuccess("");
-    
     try {
-      // Resend OTP using secure backend API
-      const res = await fetch("/api/auth/otp", {
+      // Resend OTP using new endpoint
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: email,
-          action: "send"
-        }),
+        body: JSON.stringify({ email: email }),
       });
-      
       const result = await res.json();
-      
       if (res.ok) {
         startResendCountdown();
         setSuccess("Verification code resent successfully!");
@@ -251,7 +223,6 @@ export default function ForgetPassword() {
         setError("Failed to resend code: " + result.error);
       }
     } catch (error) {
-      console.error("Resend error:", error);
       setError("Failed to resend code. Please try again.");
     } finally {
       setLoading(false);
@@ -288,13 +259,14 @@ export default function ForgetPassword() {
           submitLabel: "Verify Code",
           handleSubmit: handleOtpSubmit,
           links: [
-            { 
-              name: resendCountdown > 0 
-                ? `Resend code in ${resendCountdown}s` 
-                : "Didn't receive code? Resend", 
+            {
+              name:
+                resendCountdown > 0
+                  ? `Resend code in ${resendCountdown}s`
+                  : "Didn't receive code? Resend",
               href: "#",
               onClick: handleResendOtp,
-              disabled: resendCountdown > 0
+              disabled: resendCountdown > 0,
             },
             { name: "Change email", href: "#", onClick: handleChangeEmail },
             { name: "Back to login", href: "/authentication/login" },
@@ -310,7 +282,11 @@ export default function ForgetPassword() {
           showProviders: false,
           showDivider: false,
           links: [
-            { name: "Back to verification", href: "#", onClick: () => setStep("otp") },
+            {
+              name: "Back to verification",
+              href: "#",
+              onClick: () => setStep("otp"),
+            },
             { name: "Back to login", href: "/authentication/login" },
           ],
         };
@@ -320,11 +296,6 @@ export default function ForgetPassword() {
   const config = getStepConfig();
 
   return (
-    <AuthForm
-      {...config}
-      loading={loading}
-      error={error}
-      success={success}
-    />
+    <AuthForm {...config} loading={loading} error={error} success={success} />
   );
 }
