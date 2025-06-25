@@ -250,6 +250,7 @@ export default function ForgetPassword() {
           submitLabel: "Send Reset Code",
           handleSubmit: handleEmailSubmit,
           links: [{ name: "Back to login", href: "/authentication/login" }],
+          disableAll: loading,
         };
       case "otp":
         return {
@@ -266,11 +267,12 @@ export default function ForgetPassword() {
                   : "Didn't receive code? Resend",
               href: "#",
               onClick: handleResendOtp,
-              disabled: resendCountdown > 0,
+              disabled: resendCountdown > 0 || loading,
             },
             { name: "Change email", href: "#", onClick: handleChangeEmail },
             { name: "Back to login", href: "/authentication/login" },
           ],
+          disableAll: loading,
         };
       case "reset":
         return {
@@ -289,6 +291,7 @@ export default function ForgetPassword() {
             },
             { name: "Back to login", href: "/authentication/login" },
           ],
+          disableAll: loading,
         };
     }
   };

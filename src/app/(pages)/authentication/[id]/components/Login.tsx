@@ -53,7 +53,7 @@ export default function Login() {
     setLoading(true);
     setError("");
     setSuccess("");
-    
+
     try {
       const result = await signIn("credentials", {
         redirect: false,
@@ -79,20 +79,6 @@ export default function Login() {
     }
   };
 
-  // Handle provider login (Google, GitHub, etc.)
-  const handleProviderLogin = async (provider: string) => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
-    try {
-      await signIn(provider, { callbackUrl });
-    } catch (error: any) {
-      setError(error?.message || `Login with ${provider} failed.`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <AuthForm
       fields={loginFields}
@@ -103,11 +89,6 @@ export default function Login() {
       handleSubmit={handleLogin}
       error={error}
       success={success}
-      showProviders={true}
-      onSubmitCustom={undefined}
-      providers={["google", "github"]}
-      // Override provider button click to control redirect
-      showDivider={true}
       links={[
         {
           name: "Forgot your password?",
@@ -118,8 +99,7 @@ export default function Login() {
           href: "/authentication/signup",
         },
       ]}
-      // Custom prop to handle provider login
-      handleProviderLogin={handleProviderLogin}
+      disableAll={loading}
     />
   );
 }

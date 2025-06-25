@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     userId: session?.user?.id,
     userEmail: session?.user?.email,
     userName: session?.user?.name,
+    userPhone: session?.user?.phone,
   });
 
   // if there is no login
@@ -59,17 +60,46 @@ export async function POST(req: Request) {
 
     data.isActive = lastDonationDate > threeMonthsAgo;
 
+    console.log("Assigning user info to donor data:", {
+      userId: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      lastName: session.user.lastName,
+      contact: session.user.phone,
+      
+    });
+    
     data.userId = session.user.id;
     data.email = session.user.email;
+    data.name = session.user.name;
+    data.lastName = session.user.lastName;
+    data.contact = session.user.phone;
 
     console.log("🔧 [DONORS API] Final donor data:", data);
+
+    // Check if donor already exists for this user with same blood group and location
+    const existingDonor = await Donor.findOne({
+      userId: session.user.id,
+      bloodGroup: data.bloodGroup,
+      province: data.province,
+      district: data.district
+    });
+
+    if (existingDonor) {
+      return NextResponse.json(
+        { 
+          error: "You have already registered as a donor with this blood group in this location. Please choose a different location or blood group." 
+        },
+        { status: 400 }
+      );
+    }
 
     const donor = await Donor.create(data);
     console.log("✅ [DONORS API] Donor created successfully:", donor);
 
     console.log("🔔 [DONORS API] Creating notification...");
     await Notification.create({
-      message: `New donor registered: ${donor.firstName} ${donor.lastName || ''}`.trim(),
+      message: `New donor registered: ${donor.name} ${donor.lastName || ''}`.trim(),
       donorId: donor._id,
     });
     console.log("✅ [DONORS API] Notification created successfully");
@@ -82,6 +112,7 @@ export async function POST(req: Request) {
         name: donor.name,
         bloodGroup: donor.bloodGroup,
         isActive: donor.isActive,
+        contact: donor.contact,
       },
     });
   } catch (error: any) {
@@ -91,6 +122,14 @@ export async function POST(req: Request) {
       code: error.code,
       name: error.name,
     });
+    
+    // Handle duplicate key error (same user, blood group, and location)
+    if (error.code === 11000) {
+      return NextResponse.json({ 
+        error: "You have already registered as a donor with this blood group in this location. Please choose a different location or blood group, or contact support if you need to update your existing registration." 
+      }, { status: 409 });
+    }
+    
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

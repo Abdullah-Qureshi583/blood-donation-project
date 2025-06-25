@@ -10,7 +10,6 @@ export interface PersonalInfoSelectFieldProps {
 export interface RenderPersonalInfoStepProps {
   formData: {
     name: string;
-    fatherName: string;
     bloodGroup: string;
     lastDonation: Date | null;
   };

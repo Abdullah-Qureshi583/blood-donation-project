@@ -12,12 +12,13 @@ export async function POST(req: Request) {
     const filter: any = {};
     if (data.bloodGroup) filter.bloodGroup = data.bloodGroup;
     if (data.district) filter.district = data.district;
-    if (data.tehsil) filter.tehsil = data.tehsil;
-    if (data.unionCouncil) filter.unionCouncil = data.unionCouncil;
+    // if (data.tehsil) filter.tehsil = data.tehsil;
+    // if (data.unionCouncil) filter.unionCouncil = data.unionCouncil;
     if (data.activeOnly) filter.isActive = true;
+    if (data.province) filter.province = data.province;
     
     const donors = await Donor.find(filter).sort({ createdAt: -1 });
-    
+    console.log("the donors of the search result are :", donors)
     // Transform donor data to match the expected format
     const formattedDonors = donors.map(donor => {
       // Only include donors with valid IDs
@@ -25,16 +26,15 @@ export async function POST(req: Request) {
 
       return {
         id: donor._id.toString(),
-        name: `${donor.firstName} ${donor.lastName || ''}`.trim(),
+        name: `${donor.name} ${donor.lastName || ''}`.trim(),
         bloodGroup: donor.bloodGroup,
         province: donor.province,
         district: donor.district,
-        tehsil: donor.tehsil,
-        unionCouncil: donor.unionCouncil,
-        village: donor.village,
+        // tehsil: donor.tehsil,
+        // unionCouncil: donor.unionCouncil,
+        // village: donor.village,
         lastDonation: donor.lastDonation,
         isActive: donor.isActive,
-        isPublic: donor.isPublic,
         contact: donor.contact
       };
     }).filter(donor => donor !== null); // Filter out any null entries

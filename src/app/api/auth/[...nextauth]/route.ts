@@ -21,6 +21,14 @@ export const authOptions = {
         const cleanEmail = credentials.email.trim().toLowerCase();
         const user = await User.findOne({ email: cleanEmail });
 
+        console.log("🔍 [AUTH] User found in database:", {
+          id: user?._id,
+          email: user?.email,
+          name: user?.name,
+          lastName: user?.lastName,
+          phone: user?.phone,
+        });
+
         if (!user) {
           throw new Error("No account found with this email address");
         }
@@ -38,12 +46,16 @@ export const authOptions = {
           throw new Error("Invalid password");
         }
 
-        return { 
-          id: user._id, 
-          email: user.email, 
+        const userData = {
+          id: user._id,
+          email: user.email,
           name: user.name,
-          lastName: user.lastName
+          lastName: user.lastName,
+          phone: user.phone,
         };
+
+        console.log("🔍 [AUTH] Returning user data:", userData);
+        return userData;
       },
     }),
   ],
@@ -51,19 +63,25 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
+        console.log("🔐 JWT callback - user data:", user);
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.lastName = user.lastName;
+        token.phone = user.phone;
+        console.log("🔐 JWT callback - final token:", token);
       }
       return token;
     },
     async session({ session, token }: any) {
       if (token) {
+        console.log("📋 Session callback - token data:", token);
         session.user.id = token.id;
         session.user.email = token.email;
         session.user.name = token.name;
         session.user.lastName = token.lastName;
+        session.user.phone = token.phone;
+        console.log("📋 Session callback - final session:", session);
       }
       return session;
     },

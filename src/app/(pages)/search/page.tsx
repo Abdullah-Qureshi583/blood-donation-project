@@ -39,6 +39,7 @@ export default function DonorSearch() {
   const [submittedFilter, setSubmittedFilter] = useState<SearchDataType | null>(
     null
   );
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const isSearchActive =
     searchData.selectedBloodGroup !== "" &&

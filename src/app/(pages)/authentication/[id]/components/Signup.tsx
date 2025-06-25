@@ -148,7 +148,7 @@ export default function Signup() {
       label: "Confirm Password",
       validation: {
         required: "Please confirm your password",
-        validate: (value: string, formValues: any) => 
+        validate: (value: string, formValues: any) =>
           value === formValues.password || "Passwords do not match",
       },
     },
@@ -237,7 +237,7 @@ export default function Signup() {
       label: "Confirm Password",
       validation: {
         required: "Please confirm your password",
-        validate: (value: string, formValues: any) => 
+        validate: (value: string, formValues: any) =>
           value === formValues.password || "Passwords do not match",
       },
     },
@@ -451,7 +451,6 @@ export default function Signup() {
   let submitLabel = "";
   let handleSubmit: ((data: any) => Promise<void>) | undefined = undefined;
   let links: { name: string; href: string; onClick?: () => void }[] = [];
-  let extra: React.ReactNode = null;
 
   if (step === "form") {
     fields = signupFields;
@@ -460,7 +459,10 @@ export default function Signup() {
     submitLabel = "Send Code";
     handleSubmit = handleFormSubmit;
     links = [
-      { name: "Already have an account? Sign in", href: "/authentication/login" },
+      {
+        name: "Already have an account? Sign in",
+        href: "/authentication/login",
+      },
     ];
   } else if (step === "otp") {
     fields = otpFields;
@@ -468,9 +470,7 @@ export default function Signup() {
     description = "Enter the OTP sent to your email to complete registration.";
     submitLabel = "Verify Code & Register";
     handleSubmit = handleOtpSubmit;
-    links = [
-      { name: "Change email", href: "", onClick: handleChangeEmail },
-    ];
+    links = [{ name: "Change email", href: "", onClick: handleChangeEmail }];
   } else if (step === "register") {
     fields = registerFields;
     title = "Create Account";
@@ -478,7 +478,10 @@ export default function Signup() {
     submitLabel = "Create Account";
     handleSubmit = handleRegister;
     links = [
-      { name: "Already have an account? Sign in", href: "/authentication/login" },
+      {
+        name: "Already have an account? Sign in",
+        href: "/authentication/login",
+      },
     ];
   }
 
@@ -490,13 +493,11 @@ export default function Signup() {
         description={description}
         submitLabel={submitLabel}
         loading={loading}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleSubmit ?? (async () => {})}
         error={error}
         success={success}
         links={links}
-        showProviders={step === "form"}
-        providers={["google", "github"]}
-        showDivider={step === "form"}
+        disableAll={loading}
       />
       {step === "otp" && (
         <div className="flex items-center gap-2 mt-2 justify-center">

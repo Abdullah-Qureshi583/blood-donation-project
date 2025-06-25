@@ -48,18 +48,27 @@ const ChangeStep = ({
           const result = await res.json();
 
           setSuccess?.("Registration completed successfully! Redirecting...");
-          router.replace("/dashboard");
+          
+          // Keep loading state active during navigation
+          // Don't set loading to false here - let the redirect happen
+          // The loading state will be cleared when the component unmounts
+          
+          // Small delay to show success message before redirect
+          setTimeout(() => {
+            router.replace("/dashboard");
+          }, 1500);
         } else {
           const errorData = await res.json();
           setError?.(
             `Registration failed: ${errorData.error || "Unknown error"}`
           );
+          setLoading(false); // Only reset loading on error
         }
       } catch (e) {
         console.error("❌ [CHANGE STEP] Network error during registration:", e);
         setError?.("Registration failed. Please try again.");
+        setLoading(false); // Only reset loading on error
       }
-      setLoading(false);
     }
   };
 
@@ -73,6 +82,7 @@ const ChangeStep = ({
             console.log("⬅️ [CHANGE STEP] Going back to step:", step - 1);
             setStep(step - 1);
           }}
+          disabled={loading}
         >
           Previous
         </Button>

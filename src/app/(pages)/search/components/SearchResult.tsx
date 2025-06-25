@@ -19,7 +19,7 @@ const SearchResult = ({
 
   const handleViewDetails = (donorId: string) => {
     if (!donorId) {
-      console.error('Invalid donor ID');
+      console.error("Invalid donor ID");
       return;
     }
     router.push(`/donor/${donorId}`);
@@ -38,16 +38,19 @@ const SearchResult = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {donors.map((donor) => (
-        <Card key={donor.id} className="relative hover:shadow-lg transition-shadow">
+        <Card
+          key={donor.id}
+          className="relative hover:shadow-lg transition-shadow"
+        >
           <CardContent className="pt-6">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-semibold">{donor.name}</h3>
                 <p className="text-sm text-gray-500">
                   <span className="text-gray-700">Location:</span>{" "}
-                  {donor.village && donor.village + ", "}
+                  {/* {donor.village && donor.village + ", "}
                   {donor.unionCouncil && donor.unionCouncil + ", "}
-                  {donor.tehsil && donor.tehsil + ", "}
+                  {donor.tehsil && donor.tehsil + ", "} */}
                   {donor.district && donor.district + ", "}
                   {donor.province && donor.province}
                 </p>
@@ -60,7 +63,10 @@ const SearchResult = ({
             <div className="space-y-2">
               <div className="flex items-center text-sm">
                 <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                Last Donation: {new Date(donor.lastDonation).toLocaleDateString()}
+                Last Donation:{" "}
+                {donor.lastDonation
+                  ? new Date(donor.lastDonation).toLocaleDateString()
+                  : "Never donated"}
               </div>
 
               <div className="flex items-center text-sm">
@@ -76,17 +82,11 @@ const SearchResult = ({
               </div>
 
               <div className="flex gap-2 mt-4">
-                {donor.isPublic ? (
-                  <div className="flex items-center text-sm">
-                    <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                    {donor.contact}
-                  </div>
-                ) : (
-                  <Button variant="outline" className="flex-1">
-                    Request Contact Details
-                  </Button>
-                )}
-                <Button 
+                <div className="flex items-center text-sm">
+                  <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                  {donor.contact}
+                </div>
+                <Button
                   className="flex items-center gap-2"
                   onClick={() => handleViewDetails(donor.id)}
                 >

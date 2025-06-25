@@ -29,10 +29,13 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
 }) => {
   const isActive =
     !!formData.province && // Province must be selected
-    (!locationData.districts[formData.province] || !!formData.district) &&
-    (!locationData.tehsils[formData.district] || !!formData.tehsil) &&
-    (!locationData.unionCouncils[formData.tehsil] || !!formData.unionCouncil) &&
-    (!locationData.villages[formData.unionCouncil] || !!formData.village);
+    !!formData.district; // District must be selected
+
+    // Additional field may be add them again later
+    // (!locationData.districts[formData.province] || !!formData.district) &&
+    // (!locationData.tehsils[formData.district] || !!formData.tehsil) &&
+    // (!locationData.unionCouncils[formData.tehsil] || !!formData.unionCouncil) &&
+    // (!locationData.villages[formData.unionCouncil] || !!formData.village);
 
   return (
     <div className="space-y-4">
@@ -61,7 +64,9 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
           options={locationData.districts[formData.province] || []}
         />
       )}
-      {formData.district && locationData.tehsils[formData.district] && (
+
+      {/* may be add these fields again later */}
+       {/* {formData.district && locationData.tehsils[formData.district] && (
         <LocationSelectField
           label="Tehsil"
           value={formData.tehsil}
@@ -85,7 +90,7 @@ const RenderLocationStep: React.FC<RenderLocationStepProps> = ({
             onValueChange={(value) => handleLocationChange("village", value)}
             options={locationData.villages[formData.unionCouncil] || []}
           />
-        )}
+        )} */}
 
       <ChangeStep
         formData={formData}

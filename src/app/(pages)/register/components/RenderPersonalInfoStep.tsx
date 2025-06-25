@@ -28,8 +28,6 @@ const RenderPersonalInfoStep: React.FC<RenderPersonalInfoStepProps> = ({
   clearMessages,
 }) => {
   const isActive =
-    formData.name.trim() !== "" &&
-    formData.fatherName.trim() !== "" &&
     formData.bloodGroup !== "" &&
     formData.lastDonation instanceof Date;
 
@@ -39,20 +37,6 @@ const RenderPersonalInfoStep: React.FC<RenderPersonalInfoStepProps> = ({
 
   return (
     <div className="space-y-4">
-      <PersonalInfoSelectField
-        label="Full Name"
-        value={formData.name}
-        onChange={(value) => handleFieldChange("name", value)}
-        placeholder="Enter your full name"
-      />
-
-      <PersonalInfoSelectField
-        label="Fathers Name"
-        value={formData.fatherName}
-        onChange={(value) => handleFieldChange("fatherName", value)}
-        placeholder="Enter your father's name"
-      />
-
       <PersonalInfoSelectField
         label="Blood Group"
         value={formData.bloodGroup}

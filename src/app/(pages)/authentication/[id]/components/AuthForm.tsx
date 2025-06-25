@@ -37,6 +37,7 @@ interface AuthFormProps {
   error: string;
   success: string;
   links: LinkDefinition[];
+  disableAll?: boolean;
 }
 
 export default function AuthForm({
@@ -49,6 +50,7 @@ export default function AuthForm({
   error,
   success,
   links,
+  disableAll = false,
 }: AuthFormProps) {
   const {
     register,
@@ -57,56 +59,60 @@ export default function AuthForm({
   } = useForm();
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">{title}</h1>
-        <p className="text-gray-500 dark:text-gray-400">{description}</p>
-      </div>
+    <div className="w-full max-w-md mx-auto py-8">
+      <Card className="border border-gray-200 shadow-lg rounded-xl p-6 bg-white dark:bg-gray-900">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-3xl font-bold mb-1">{title}</CardTitle>
+          <p className="text-gray-500 dark:text-gray-400 text-base">{description}</p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleFormSubmit(handleSubmit)} className="space-y-4">
+            {fields.map((field) => (
+              <div key={field.name} className="space-y-2">
+                <Label htmlFor={field.name}>{field.label}</Label>
+                <Input
+                  id={field.name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  {...register(field.name, field.validation)}
+                />
+                {errors[field.name] && (
+                  <p className="text-sm text-red-500">
+                    {errors[field.name]?.message as string}
+                  </p>
+                )}
+              </div>
+            ))}
 
-      <form onSubmit={handleFormSubmit(handleSubmit)} className="space-y-4">
-        {fields.map((field) => (
-          <div key={field.name} className="space-y-2">
-            <Label htmlFor={field.name}>{field.label}</Label>
-            <Input
-              id={field.name}
-              type={field.type}
-              placeholder={field.placeholder}
-              {...register(field.name, field.validation)}
-            />
-            {errors[field.name] && (
-              <p className="text-sm text-red-500">
-                {errors[field.name]?.message as string}
-              </p>
-            )}
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            {success && <p className="text-sm text-green-500 text-center">{success}</p>}
+
+            <Button type="submit" className="w-full mt-2" disabled={loading || disableAll}>
+              {loading ? "Please wait..." : submitLabel}
+            </Button>
+          </form>
+          <div className="space-y-2 mt-6">
+            {links.map((link, index) => (
+              <div key={index} className="text-sm text-center">
+                {link.onClick ? (
+                  <button
+                    onClick={link.onClick}
+                    className="text-primary hover:underline"
+                    disabled={link.disabled || disableAll}
+                  >
+                    {link.name}
+                  </button>
+                ) : (
+                  <Link href={link.href} className={cn("text-primary hover:underline", disableAll && "pointer-events-none opacity-60")}
+                  >
+                    {link.name}
+                  </Link>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        {success && <p className="text-sm text-green-500">{success}</p>}
-
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Please wait..." : submitLabel}
-        </Button>
-      </form>
-
-      <div className="space-y-2">
-        {links.map((link, index) => (
-          <div key={index} className="text-sm text-center">
-            {link.onClick ? (
-              <button
-                onClick={link.onClick}
-                className="text-primary hover:underline"
-              >
-                {link.name}
-              </button>
-            ) : (
-              <Link href={link.href} className="text-primary hover:underline">
-                {link.name}
-              </Link>
-            )}
-          </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

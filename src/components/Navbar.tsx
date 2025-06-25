@@ -6,6 +6,7 @@ import { Menu, X, Bell, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
+import Swal from 'sweetalert2';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -57,7 +58,26 @@ export default function Navbar() {
   };
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+    const result = await Swal.fire({
+      title: 'Are you sure you want to sign out?',
+      text: "You'll need to sign in again to access your account.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, sign out',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-lg',
+        confirmButton: 'rounded-md',
+        cancelButton: 'rounded-md'
+      }
+    });
+
+    if (result.isConfirmed) {
+      await signOut({ callbackUrl: "/" });
+    }
   };
 
   return (

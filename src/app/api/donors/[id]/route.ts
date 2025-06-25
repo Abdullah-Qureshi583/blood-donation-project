@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/connectDB";
 import Donor from "@/models/Donor";
 
+interface DonorResponse {
+  id: string;
+  name: string;
+  lastName: string;
+  bloodGroup: string;
+  email: string;
+  contact?: string;
+  isActive: boolean;
+  lastDonation: Date | null;
+  // village?: string;
+  // unionCouncil?: string;
+  // tehsil?: string;
+  district: string;
+  province: string;
+  country: string;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -11,30 +28,27 @@ export async function GET(
 
     const donor = await Donor.findById(params.id);
     if (!donor) {
-      return NextResponse.json(
-        { error: "Donor not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Donor not found" }, { status: 404 });
     }
+    console.log("The response of the id donor is :", donor)
 
-    return NextResponse.json({
+    return NextResponse.json<{ donor: DonorResponse }>({
       donor: {
         id: donor._id,
-        firstName: donor.firstName,
+        name: donor.name,
         lastName: donor.lastName,
         bloodGroup: donor.bloodGroup,
         email: donor.email,
         contact: donor.contact,
         isActive: donor.isActive,
-        isPublic: donor.isPublic,
         lastDonation: donor.lastDonation,
-        village: donor.village,
-        unionCouncil: donor.unionCouncil,
-        tehsil: donor.tehsil,
+        // village: donor.village,
+        // unionCouncil: donor.unionCouncil,
+        // tehsil: donor.tehsil,
         district: donor.district,
         province: donor.province,
-        country: donor.country
-      }
+        country: donor.country,
+      },
     });
   } catch (error: any) {
     console.error("Error fetching donor:", error);
@@ -43,4 +57,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
