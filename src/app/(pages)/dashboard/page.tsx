@@ -23,6 +23,7 @@ import ProfileHeader from "./components/ProfileHeader";
 import ProfileStats from "./components/ProfileStats";
 import Achievements from "./components/Achievements";
 import Notifications from "./components/Notifications";
+import Swal from "sweetalert2";
 
 interface DonorProfile {
   _id: string;
@@ -37,18 +38,21 @@ interface DonorProfile {
 }
 
 const DashboardPage = () => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [donorProfiles, setDonorProfiles] = useState<DonorProfile[]>([]);
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedDonorId, setSelectedDonorId] = useState("");
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError("");
-        
+
         // Fetch donor profiles
         const donorRes = await fetch("/api/donors/me");
         if (!donorRes.ok) {
@@ -82,12 +86,130 @@ const DashboardPage = () => {
     }
   }, [session]);
 
+  const handleEditDonor = (donorId: string) => {
+    setSelectedDonorId(donorId);
+    setEditModalOpen(true);
+  };
+
+  const handleEditProfile = () => {
+    setProfileModalOpen(true);
+  };
+
+  const handleDonorUpdate = () => {
+    // Refresh donor data after update
+    const fetchData = async () => {
+      try {
+        setError("");
+
+        // Fetch donor profiles
+        const donorRes = await fetch("/api/donors/me");
+        if (!donorRes.ok) {
+          throw new Error("Failed to fetch donor profiles");
+        }
+        const donorData = await donorRes.json();
+        if (donorData.success) {
+          setDonorProfiles(donorData.donors);
+        }
+
+        // Fetch notifications
+        const notificationRes = await fetch("/api/notifications");
+        if (!notificationRes.ok) {
+          console.warn("Failed to fetch notifications");
+        } else {
+          const notificationData = await notificationRes.json();
+          if (notificationData.notifications) {
+            setNotifications(notificationData.notifications);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setError("Failed to load dashboard data. Please refresh the page.");
+      }
+    };
+
+    fetchData();
+  };
+
+  const handleProfileUpdate = async () => {
+    // Simple session update
+    await update();
+
+    // Refresh donor data
+    const fetchData = async () => {
+      try {
+        setError("");
+
+        // Fetch donor profiles
+        const donorRes = await fetch("/api/donors/me");
+        if (!donorRes.ok) {
+          throw new Error("Failed to fetch donor profiles");
+        }
+        const donorData = await donorRes.json();
+        if (donorData.success) {
+          setDonorProfiles(donorData.donors);
+        }
+
+        // Fetch notifications
+        const notificationRes = await fetch("/api/notifications");
+        if (!notificationRes.ok) {
+          console.warn("Failed to fetch notifications");
+        } else {
+          const notificationData = await notificationRes.json();
+          if (notificationData.notifications) {
+            setNotifications(notificationData.notifications);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setError("Failed to load dashboard data. Please refresh the page.");
+      }
+    };
+
+    fetchData();
+  };
+
+  const handleDeleteDonor = async (donorId: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete this donor profile.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      setError("");
+      const res = await fetch(`/api/donors/${donorId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete donor");
+      // Refresh donor data
+      const donorRes = await fetch("/api/donors/me");
+      if (!donorRes.ok) throw new Error("Failed to fetch donor profiles");
+      const donorData = await donorRes.json();
+      if (donorData.success) setDonorProfiles(donorData.donors);
+      await Swal.fire(
+        "Deleted!",
+        "The donor profile has been deleted.",
+        "success"
+      );
+    } catch (err) {
+      setError("Failed to delete donor. Please try again.");
+      await Swal.fire(
+        "Error",
+        "Failed to delete donor. Please try again.",
+        "error"
+      );
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--normalRed)] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your dashboard...</p>
           </div>
         </div>
@@ -127,8 +249,8 @@ const DashboardPage = () => {
     <div className="container mx-auto py-8 px-4">
       {/* Error Display */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-700">{error}</p>
+        <div className="mb-6 p-4 bg-lightRed border border-[color:var(--normalRed)] rounded-lg">
+          <p className="text-normalRed">{error}</p>
         </div>
       )}
 
@@ -136,15 +258,15 @@ const DashboardPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {session?.user?.name}!
+            Welcome back, {session.user.name}!
           </h1>
           <p className="text-gray-600 mt-1">
             Manage your blood donation profiles and track your impact
           </p>
         </div>
-        <Button
+        <Button 
           onClick={() => router.push("/register")}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
+          className="flex items-center gap-2 bg-normalRed hover:bg-darkRed"
         >
           <Plus className="w-4 h-4" />
           Register as Donor
@@ -152,14 +274,15 @@ const DashboardPage = () => {
       </div>
 
       {/* Profile Header */}
-      <ProfileHeader
-        name={`${session?.user?.name} ${session?.user?.lastName || ""}`}
-        email={session?.user?.email || ""}
+      <ProfileHeader 
+        name={`${session.user.name} ${session.user.lastName || ""}`}
+        email={session.user.email || ""}
+        onEditProfile={handleEditProfile}
       />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 mt-8 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="border-l-4 border-l-red-500">
+        <Card className="border-l-4 border-l-[color:var(--normalRed)]">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -170,7 +293,7 @@ const DashboardPage = () => {
                   {totalDonations}
                 </p>
               </div>
-              <Droplets className="h-8 w-8 text-red-500" />
+              <Droplets className="h-8 w-8 text-normalRed" />
             </div>
           </CardContent>
         </Card>
@@ -202,7 +325,7 @@ const DashboardPage = () => {
                   {recentDonations}
                 </p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-500" />
+              <Calendar className="h-8 w-8 text-normalBlue" />
             </div>
           </CardContent>
         </Card>
@@ -230,8 +353,8 @@ const DashboardPage = () => {
       {donorProfiles.length === 0 ? (
         <div className="text-center py-16">
           <div className="max-w-md mx-auto">
-            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-              <Heart className="h-12 w-12 text-red-500" />
+            <div className="bg-gradient-to-br from-lightRed to-pink-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+              <Heart className="h-12 w-12 text-normalRed" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Start Your Blood Donation Journey
@@ -243,12 +366,12 @@ const DashboardPage = () => {
             <div className="space-y-4">
               <Button
                 onClick={() => router.push("/register")}
-                className="bg-red-600 hover:bg-red-700 px-8 py-3 text-lg"
+                className="bg-normalRed hover:bg-darkRed px-8 py-3 text-lg"
                 size="lg"
               >
                 <UserPlus className="w-5 h-5 mr-2" />
-                Register as Donor
-              </Button>
+            Register as Donor
+          </Button>
               <div className="text-sm text-gray-500">
                 <p>✓ Quick and easy registration</p>
                 <p>✓ Help save lives in your community</p>
@@ -265,16 +388,19 @@ const DashboardPage = () => {
               Your Donor Profiles
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {donorProfiles.map((donor) => (
-                <ProfileStats
+          {donorProfiles.map((donor) => (
+            <ProfileStats
                   key={donor._id || donor.id}
-                  bloodGroup={donor.bloodGroup}
-                  lastDonation={donor.lastDonation}
+                  _id={donor._id}
+                  id={donor.id}
+              bloodGroup={donor.bloodGroup}
+              lastDonation={donor.lastDonation}
                   location={`${donor.district}, ${donor.province}`}
-                  contact={donor.contact}
-                  isActive={donor.isActive}
-                />
-              ))}
+              contact={donor.contact}
+              isActive={donor.isActive}
+                  onDelete={handleDeleteDonor}
+            />
+          ))}
             </div>
           </div>
 

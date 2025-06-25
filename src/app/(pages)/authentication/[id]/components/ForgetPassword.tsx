@@ -188,6 +188,7 @@ export default function ForgetPassword() {
       if (res.ok && result.success) {
         console.log("Password reset:", result);
         setSuccess("Password reset successfully! Redirecting to login...");
+        setLoading(true);
         setTimeout(() => {
           router.push("/authentication/login");
         }, 1500);

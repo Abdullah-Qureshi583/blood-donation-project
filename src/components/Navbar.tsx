@@ -87,7 +87,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-normalRed flex items-center justify-center">
                 <span className="text-white font-bold text-xl">B</span>
               </div>
               <span className="text-xl font-bold text-gray-900">BloodLife</span>
@@ -100,7 +100,7 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-gray-600 hover:text-red-600 transition-colors duration-200
+                className={`text-gray-600 hover:text-normalRed transition-colors duration-200
                   ${item.name.includes("Donor") ? "font-medium" : ""}`}
               >
                 {item.name}
@@ -116,7 +116,7 @@ export default function Navbar() {
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-6 w-6" />
                       {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                        <span className="absolute -top-1 -right-1 bg-normalRed text-white text-xs rounded-full px-1.5 py-0.5">
                           {unreadCount}
                         </span>
                       )}
@@ -125,14 +125,14 @@ export default function Navbar() {
                   <DropdownMenuContent align="end" className="w-80">
                     <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {notifications.length === 0 && (
+                    {notifications?.length === 0 && (
                       <DropdownMenuItem>No notifications</DropdownMenuItem>
                     )}
                     {notifications.map((n: any) => (
                       <DropdownMenuItem
                         key={n._id}
                         onClick={() => markAsRead(n._id)}
-                        className={n.read ? "" : "font-bold bg-red-50"}
+                        className={n.read ? "" : "font-bold bg-lightRed"}
                       >
                         {n.message}
                       </DropdownMenuItem>
@@ -166,7 +166,7 @@ export default function Navbar() {
                   <Button variant="ghost">Sign In</Button>
                 </Link>
                 <Link href="/authentication/signup">
-                  <Button className="bg-red-600 hover:bg-red-700">Sign Up</Button>
+                  <Button className="bg-normalRed hover:bg-darkRed">Sign Up</Button>
                 </Link>
               </div>
             )}
@@ -180,7 +180,7 @@ export default function Navbar() {
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-6 w-6" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                      <span className="absolute -top-1 -right-1 bg-normalRed text-white text-xs rounded-full px-1.5 py-0.5">
                         {unreadCount}
                       </span>
                     )}
@@ -196,7 +196,7 @@ export default function Navbar() {
                     <DropdownMenuItem
                       key={n._id}
                       onClick={() => markAsRead(n._id)}
-                      className={n.read ? "" : "font-bold bg-red-50"}
+                      className={n.read ? "" : "font-bold bg-lightRed"}
                     >
                       {n.message}
                     </DropdownMenuItem>
@@ -227,7 +227,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-normalRed hover:bg-lightRed transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
@@ -238,7 +238,7 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/dashboard"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-normalRed hover:bg-lightRed transition-colors duration-200"
                     onClick={() => setIsOpen(false)}
                   >
                     Dashboard
@@ -248,7 +248,7 @@ export default function Navbar() {
                       handleSignOut();
                       setIsOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-normalRed hover:bg-lightRed transition-colors duration-200"
                   >
                     Sign Out
                   </button>
@@ -257,14 +257,14 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/authentication/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-normalRed hover:bg-lightRed transition-colors duration-200"
                     onClick={() => setIsOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/authentication/signup"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-normalRed hover:text-darkRed hover:bg-lightRed transition-colors duration-200"
                     onClick={() => setIsOpen(false)}
                   >
                     Sign Up

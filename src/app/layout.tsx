@@ -33,7 +33,7 @@ export default function RootLayout({
             <Footer />
           </AuthProvider>
         </ThemeProvider>
-        <Script src="/liquid-glass.js" />
+        {/* <Script src="/liquid-glass.js" /> */}
       </body>
     </html>
   );

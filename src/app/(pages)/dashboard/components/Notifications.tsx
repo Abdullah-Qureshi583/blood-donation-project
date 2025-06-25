@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Bell, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Bell, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 
 interface Notification {
   _id: string;
@@ -14,7 +14,9 @@ interface NotificationsProps {
   notifications: Notification[];
 }
 
-const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNotifications }) => {
+const Notifications: React.FC<NotificationsProps> = ({
+  notifications: initialNotifications,
+}) => {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [showAll, setShowAll] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -24,7 +26,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
     // First sort by read status (unread first)
     if (!a.read && b.read) return -1;
     if (a.read && !b.read) return 1;
-    
+
     // Then sort by date (newest first)
     if (a.createdAt && b.createdAt) {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -33,29 +35,29 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
   });
 
   // Separate unread and read notifications
-  const unreadNotifications = sortedNotifications.filter(n => !n.read);
-  const readNotifications = sortedNotifications.filter(n => n.read);
+  const unreadNotifications = sortedNotifications.filter((n) => !n.read);
+  const readNotifications = sortedNotifications.filter((n) => n.read);
 
   // Determine which notifications to show
-  const notificationsToShow = showAll 
-    ? sortedNotifications 
+  const notificationsToShow = showAll
+    ? sortedNotifications
     : sortedNotifications.slice(0, 3);
 
   const hasMoreNotifications = sortedNotifications.length > 3;
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      const response = await fetch('/api/notifications', {
-        method: 'PATCH',
+      const response = await fetch("/api/notifications", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ id: notificationId }),
       });
 
       if (response.ok) {
-        setNotifications(prevNotifications =>
-          prevNotifications.map(notification =>
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notification) =>
             notification._id === notificationId
               ? { ...notification, read: true }
               : notification
@@ -63,19 +65,21 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
         );
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
     }
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInHours < 48) return 'Yesterday';
+    if (diffInHours < 48) return "Yesterday";
     return date.toLocaleDateString();
   };
 
@@ -112,14 +116,16 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
           </Button>
         </div>
       </CardHeader>
-      
+
       {expanded && (
         <CardContent className="pt-0">
           {notifications.length === 0 ? (
             <div className="text-center py-8">
               <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">No notifications yet</p>
-              <p className="text-sm text-gray-400">You'll see updates here when they arrive</p>
+              <p className="text-sm text-gray-400">
+                You'll see updates here when they arrive
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -134,7 +140,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
                     {unreadNotifications.map((notification) => (
                       <div
                         key={notification._id}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-red-50 border border-red-100 hover:bg-red-100 transition-colors"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-100 hover:bg-red-100 transition-colors"
                       >
                         <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
                         <div className="flex-1 min-w-0">
@@ -167,7 +173,10 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
                     Read ({readNotifications.length})
                   </h4>
                   <div className="space-y-2">
-                    {(showAll ? readNotifications : readNotifications.slice(0, 2)).map((notification) => (
+                    {(showAll
+                      ? readNotifications
+                      : readNotifications.slice(0, 2)
+                    ).map((notification) => (
                       <div
                         key={notification._id}
                         className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100"
@@ -218,4 +227,4 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications: initialNot
   );
 };
 
-export default Notifications; 
+export default Notifications;

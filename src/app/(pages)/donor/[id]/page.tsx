@@ -155,7 +155,7 @@ export default function DonorDetailPage() {
                   <p className="text-gray-600">Primary contact method</p>
                 </div>
               </div>
-              <p className="text-xl font-medium text-gray-900 ml-16">
+              <p className=" font-medium text-gray-900 ml-16">
                 {donor.contact || 'Not provided'}
               </p>
             </div>
@@ -170,7 +170,7 @@ export default function DonorDetailPage() {
                   <p className="text-gray-600">Alternative contact method</p>
                 </div>
               </div>
-              <p className="text-xl font-medium text-gray-900 ml-16">
+              <p className=" font-medium break-words text-gray-900 ml-16">
                 {donor.email}
               </p>
             </div>

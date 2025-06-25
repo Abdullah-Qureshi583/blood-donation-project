@@ -47,8 +47,8 @@ export const authOptions = {
         }
 
         const userData = {
-          id: user._id,
-          email: user.email,
+          id: user._id, 
+          email: user.email, 
           name: user.name,
           lastName: user.lastName,
           phone: user.phone,
@@ -70,6 +70,34 @@ export const authOptions = {
         token.lastName = user.lastName;
         token.phone = user.phone;
         console.log("🔐 JWT callback - final token:", token);
+      } else if (token.id) {
+        // Fetch fresh user data from database to ensure token is up to date
+        try {
+          await connectDB();
+          const freshUser = await User.findById(token.id);
+          if (freshUser) {
+            // Check if user data has been updated since last token generation
+            const tokenLastUpdated = token.lastUpdated;
+            const userLastUpdated = freshUser.updatedAt;
+            
+            if (!tokenLastUpdated || !userLastUpdated || userLastUpdated > tokenLastUpdated) {
+              console.log("🔐 JWT callback - updating token with fresh data:", {
+                name: freshUser.name,
+                lastName: freshUser.lastName,
+                email: freshUser.email,
+                phone: freshUser.phone,
+                lastUpdated: freshUser.updatedAt
+              });
+              token.name = freshUser.name;
+              token.lastName = freshUser.lastName;
+              token.email = freshUser.email;
+              token.phone = freshUser.phone;
+              token.lastUpdated = freshUser.updatedAt;
+            }
+          }
+        } catch (error) {
+          console.error("🔐 JWT callback - error fetching fresh user data:", error);
+        }
       }
       return token;
     },

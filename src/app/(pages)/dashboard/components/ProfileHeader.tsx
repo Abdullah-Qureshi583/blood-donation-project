@@ -8,9 +8,10 @@ import Swal from 'sweetalert2';
 interface ProfileHeaderProps {
   name: string;
   email: string;
+  onEditProfile?: () => void;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, onEditProfile }) => {
   const handleLogout = async () => {
     const result = await Swal.fire({
       title: 'Are you sure you want to logout?',
@@ -46,7 +47,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email }) => {
           <p className="text-gray-600">{email}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={onEditProfile}
+          >
             <Edit className="mr-2 h-4 w-4" /> Edit
           </Button>
           <Button 

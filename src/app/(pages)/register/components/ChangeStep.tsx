@@ -55,7 +55,7 @@ const ChangeStep = ({
           
           // Small delay to show success message before redirect
           setTimeout(() => {
-            router.replace("/dashboard");
+          router.replace("/dashboard");
           }, 1500);
         } else {
           const errorData = await res.json();

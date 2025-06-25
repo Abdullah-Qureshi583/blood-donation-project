@@ -1,7 +1,7 @@
 // app/api/search/route.ts (API to Search Donors)
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/connectDB";
-import Donor from "@/models/Donor";
+import User from "@/models/User";
 
 export async function POST(req: Request) {
   try {
@@ -9,35 +9,41 @@ export async function POST(req: Request) {
     
     const data = await req.json();
     
+    // Build the filter for the aggregation pipeline
     const filter: any = {};
-    if (data.bloodGroup) filter.bloodGroup = data.bloodGroup;
-    if (data.district) filter.district = data.district;
-    // if (data.tehsil) filter.tehsil = data.tehsil;
-    // if (data.unionCouncil) filter.unionCouncil = data.unionCouncil;
-    if (data.activeOnly) filter.isActive = true;
-    if (data.province) filter.province = data.province;
+    if (data.bloodGroup) filter["donors.bloodGroup"] = data.bloodGroup;
+    if (data.district) filter["donors.district"] = data.district;
+    if (data.activeOnly) filter["donors.isActive"] = true;
+    if (data.province) filter["donors.province"] = data.province;
     
-    const donors = await Donor.find(filter).sort({ createdAt: -1 });
-    console.log("the donors of the search result are :", donors)
-    // Transform donor data to match the expected format
-    const formattedDonors = donors.map(donor => {
-      // Only include donors with valid IDs
-      if (!donor._id) return null;
+    // Find users with matching donor profiles
+    const users = await User.find({
+      donors: { $exists: true, $not: { $size: 0 } },
+      ...filter
+    });
 
-      return {
-        id: donor._id.toString(),
-        name: `${donor.name} ${donor.lastName || ''}`.trim(),
-        bloodGroup: donor.bloodGroup,
-        province: donor.province,
-        district: donor.district,
-        // tehsil: donor.tehsil,
-        // unionCouncil: donor.unionCouncil,
-        // village: donor.village,
-        lastDonation: donor.lastDonation,
-        isActive: donor.isActive,
-        contact: donor.contact
-      };
-    }).filter(donor => donor !== null); // Filter out any null entries
+    // Transform and flatten donor data
+    const formattedDonors = users.flatMap(user => 
+      user.donors
+        .filter(donor => {
+          // Apply filters at the donor level
+          if (data.bloodGroup && donor.bloodGroup !== data.bloodGroup) return false;
+          if (data.district && donor.district !== data.district) return false;
+          if (data.province && donor.province !== data.province) return false;
+          if (data.activeOnly && !donor.isActive) return false;
+          return true;
+        })
+        .map(donor => ({
+          id: donor._id.toString(),
+          name: `${user.name} ${user.lastName || ''}`.trim(),
+          bloodGroup: donor.bloodGroup,
+          province: donor.province,
+          district: donor.district,
+          lastDonation: donor.lastDonation,
+          isActive: donor.isActive,
+          contact: donor.contact || user.phone
+        }))
+    ).sort((a, b) => b.lastDonation - a.lastDonation);
 
     return NextResponse.json({ 
       success: true,

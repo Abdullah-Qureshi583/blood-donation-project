@@ -1,23 +1,32 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Heart, Clock, ShieldCheck, MapPin, Phone } from 'lucide-react';
+import { Heart, Clock, ShieldCheck, MapPin, Phone, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface ProfileStatsProps {
+  _id?: string;
+  id?: string;
   bloodGroup: string;
   lastDonation: Date | null;
   location: string;
   contact?: string;
   isActive: boolean;
+  onDelete?: (donorId: string) => void;
 }
 
 const ProfileStats: React.FC<ProfileStatsProps> = ({
+  _id,
+  id,
   bloodGroup,
   lastDonation,
   location,
   contact,
-  isActive
+  isActive,
+  onDelete
 }) => {
+  const donorId = _id || id;
+
   // Format dates to be more readable
   const formatDate = (date: Date | null) => {
     if (!date) return 'No donation recorded';
@@ -29,9 +38,21 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Donor Profile</CardTitle>
+    <Card className="relative group hover:shadow-lg transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Donor Profile</CardTitle>
+          {onDelete && donorId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(donorId)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:bg-red-100"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Blood Group */}

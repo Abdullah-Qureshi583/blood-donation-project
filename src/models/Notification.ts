@@ -4,14 +4,16 @@ export interface INotification extends Document {
   message: string;
   read: boolean;
   createdAt: Date;
-  donorId?: string;
-  requestId?: string;
+  userId: mongoose.Types.ObjectId;
+  donorProfileId?: mongoose.Types.ObjectId;
+  requestId?: mongoose.Types.ObjectId;
 }
 
 const NotificationSchema = new Schema<INotification>({
   message: { type: String, required: true },
   read: { type: Boolean, default: false },
-  donorId: { type: Schema.Types.ObjectId, ref: 'Donor' },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  donorProfileId: { type: Schema.Types.ObjectId },
   requestId: { type: Schema.Types.ObjectId, ref: 'Request' },
   createdAt: { type: Date, default: Date.now },
 });
