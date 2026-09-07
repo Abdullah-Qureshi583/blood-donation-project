@@ -5,14 +5,16 @@
 ---
 
 > **Created & Maintained by [Abdullah Qureshi](https://abdullah-qureshi.vercel.app)**  
-> 🌐 **Portfolio**: [abdullah-qureshi.vercel.app](https://abdullah-qureshi.vercel.app) • 💼 **LinkedIn**: [abdullahqureshi27](https://www.linkedin.com/in/abdullahqureshi27) • 🐙 **GitHub**: [@abdullahqureshi27](https://github.com/abdullahqureshi27)
+> 🚀 **Live Application**: [aq-blood-life.vercel.app](https://aq-blood-life.vercel.app) • 🌐 **Portfolio**: [abdullah-qureshi.vercel.app](https://abdullah-qureshi.vercel.app) • 💼 **LinkedIn**: [abdullahqureshi27](https://www.linkedin.com/in/abdullahqureshi27) • 🐙 **GitHub**: [@abdullahqureshi27](https://github.com/abdullahqureshi27)
 
 ---
 
+[![Live Demo](https://img.shields.io/badge/Live_App-aq--blood--life.vercel.app-red?style=for-the-badge&logo=vercel)](https://aq-blood-life.vercel.app)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js_14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB_Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
 [![NextAuth](https://img.shields.io/badge/Auth-NextAuth.js-blueviolet?style=for-the-badge)](https://next-auth.js.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![SEO & AEO](https://img.shields.io/badge/SEO%20%26%20AEO-Optimized-success?style=for-the-badge&logo=google)](https://github.com/abdullahqureshi27/blood-life)
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)](https://github.com/abdullahqureshi27/blood-life)
 
 ---
@@ -22,6 +24,7 @@
 - 🩸 **Blood Group Matching & Filtering**: Search prospective donors by blood type (A+, A-, B+, B-, AB+, AB-, O+, O-), city, district, and readiness status.
 - 📋 **Donor Registration & Profile**: Donors can register, specify donation history, set availability toggles, and manage emergency contact info.
 - 🚨 **Urgent Blood Requests**: Post emergency blood requirements with hospital location, required units, and urgency level.
+- 🔍 **Complete SEO, AEO & GEO Architecture**: Pre-configured dynamic `sitemap.xml`, `robots.txt`, Schema.org JSON-LD structured data (`MedicalOrganization`, `WebSite`, `FAQPage`), high-CTR OpenGraph social card, and AI answer engine optimizations.
 - 🔐 **Secure NextAuth Authentication**: Password encryption via bcryptjs and session persistence with MongoDB adapter.
 - 📬 **Email Notification Dispatch**: Automated confirmation and inquiry routing via Nodemailer.
 - 📱 **Mobile-Optimized UI**: Accessible forms, responsive tabs, date pickers, and alerts powered by Tailwind and Radix UI.
